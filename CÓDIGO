@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modbus</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    body::-webkit-scrollbar {
+      display: none; /* Chrome, Safari e Opera */
+    }
+
+    body {
+      -ms-overflow-style: none; /* IE e Edge */
+      scrollbar-width: none; /* Firefox */
+    }
+
+    section { 
+      display: flex;
+      flex-direction: column; 
+      align-items: center; 
+    }
+
+    .direction-button {  
+      width: 90px;
+      height: 90px;
+      font-size: 12px;
+      background-color: #2F4F4F; /* Cor inicial */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+      transition: background-color 0.3s; /* Transição suave */
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .direction-button.clicked {
+      background-color: red !important; /* Importante adicionar !important */
+    }
+
+    .direction-button:before {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-top: 20px solid transparent;
+      border-bottom: 20px solid transparent;
+      border-right: 20px solid white;
+    }
+
+    #CIMA:before {
+      transform: rotate(90deg); /* Alterado para CIMA */
+    }
+
+    #BAIXO:before {
+      transform: rotate(-90deg); /* Alterado para BAIXO */
+    }
+
+    #ESQUERDA:before {
+      transform: rotate(180deg);
+    }
+
+    #DIREITA:before {
+      transform: rotate(0deg);
+    }
+
+    #GARRA {  
+      width: 90px;
+      height: 90px;
+      font-size: 12px;
+      background-color: #00CED1; /* Cor inicial */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #GARRA.active {
+      background-color: red;
+    }
+
+  </style>
+</head>
+<body>
+  <section>
+    <button id="CIMA" class="direction-button" aria-label="CIMA"></button> <!-- Trocado -->
+    <div style="display: flex; flex-direction: row;">
+        <button id="DIREITA" class="direction-button" aria-label="DIREITA"></button>
+        <button id="GARRA" aria-label="GARRA">GARRA</button>
+        <button id="ESQUERDA" class="direction-button" aria-label="ESQUERDA"></button>
+    </div>
+    <button id="BAIXO" class="direction-button" aria-label="BAIXO"></button> <!-- Trocado -->
+  </section>
+
+  <script>
+    var buttons = {
+      up: 0,
+      down: 0,
+      left: 0,
+      right: 0,
+      garra: 0
+    };
+
+    var button_Left = document.getElementById("ESQUERDA");
+    var button_Up = document.getElementById("CIMA");
+    var button_Right = document.getElementById("DIREITA");
+    var button_Down = document.getElementById("BAIXO");
+    var button_Garra = document.getElementById("GARRA");
+
+    function sendCommand() {
+      fetch('https://eight-modbuscomservidorrender.onrender.com/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(buttons)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to send command');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+
+    button_Left.addEventListener("click", function() {
+      buttons.left = 1;
+      buttons.up = 0;
+      buttons.down = 0;
+      buttons.right = 0;
+      button_Left.classList.add("clicked");
+      button_Up.classList.remove("clicked");
+      button_Right.classList.remove("clicked");
+      button_Down.classList.remove("clicked");
+      sendCommand();
+      setTimeout(function() {
+        button_Left.classList.remove("clicked");
+      }, 300); // 300 milissegundos
+    });
+
+    button_Up.addEventListener("click", function() {
+      buttons.up = 1;
+      buttons.down = 0;
+      buttons.left = 0;
+      buttons.right = 0;
+      button_Up.classList.add("clicked");
+      button_Left.classList.remove("clicked");
+      button_Right.classList.remove("clicked");
+      button_Down.classList.remove("clicked");
+      sendCommand();
+      setTimeout(function() {
+        button_Up.classList.remove("clicked");
+      }, 300); // 300 milissegundos
+    });
+
+    button_Right.addEventListener("click", function() {
+      buttons.right = 1;
+      buttons.up = 0;
+      buttons.down = 0;
+      buttons.left = 0;
+      button_Right.classList.add("clicked");
+      button_Left.classList.remove("clicked");
+      button_Up.classList.remove("clicked");
+      button_Down.classList.remove("clicked");
+      sendCommand();
+      setTimeout(function() {
+        button_Right.classList.remove("clicked");
+      }, 300); // 300 milissegundos
+    });
+
+    button_Down.addEventListener("click", function() {
+      buttons.down = 1;
+      buttons.up = 0;
+      buttons.left = 0;
+      buttons.right = 0;
+      button_Down.classList.add("clicked");
+      button_Left.classList.remove("clicked");
+      button_Up.classList.remove("clicked");
+      button_Right.classList.remove("clicked");
+      sendCommand();
+      setTimeout(function() {
+        button_Down.classList.remove("clicked");
+      }, 300); // 300 milissegundos
+    });
+
+    button_Garra.addEventListener("click", function() {
+      buttons.garra ^= 1; // Alternates the value of 'garra' (0 or 1)
+      button_Garra.classList.toggle("active");
+      sendCommand();
+    });
+  </script>
+</body>
+</html>
